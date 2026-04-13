@@ -287,6 +287,7 @@ begin
     end process;
 end Behavioral;
 ```
+<img width="1482" height="830" alt="image" src="https://github.com/user-attachments/assets/0e6ff2f1-5520-4856-bd2f-f80278f6f72d" />
 
 ---
 
