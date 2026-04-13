@@ -98,22 +98,7 @@ Generuje clock pro mikrofon (dělení 100 MHz / 32 = 3.125 MHz) a čte PDM data 
 | `pdm_valid_o` | out | std_logic | Pulz = nový platný bit |
 
 #### VHDL kód
-
--------------------------------------------------
---! @brief PDM microphone driver
---! @version 1.0
---!
---! Generates microphone clock by dividing main clock
---! by G_CLK_DIV. Samples PDM data on rising edge of
---! mic_clk and outputs a single-cycle valid pulse.
---!
---! Nexys A7 onboard MEMS mic: ~3.125 MHz clock
---! (100 MHz / 32 = 3.125 MHz)
--------------------------------------------------
-library ieee;
-  use ieee.std_logic_1164.all;
-  use ieee.numeric_std.all;
--------------------------------------------------
+```vhdl
 entity pdm_driver is
     generic (
         G_CLK_DIV : positive := 32  --! Clock divider (100 MHz / 32 = 3.125 MHz)
