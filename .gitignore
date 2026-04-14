@@ -1,0 +1,25 @@
+# Vivado generated cache and temp files
+*.jou
+*.log
+*.str
+*.debug
+
+# Vivado project generated folders
+audio_visualizer/audio_visualizer.cache/
+audio_visualizer/audio_visualizer.hw/
+audio_visualizer/audio_visualizer.ip_user_files/
+audio_visualizer/audio_visualizer.runs/
+audio_visualizer/audio_visualizer.sim/
+audio_visualizer/audio_visualizer.gen/
+
+# Bitstream files (large binary)
+*.bit
+*.bin
+*.mcs
+
+# Vivado backup files
+*.jou.bak
+
+# OS files
+.DS_Store
+Thumbs.db
