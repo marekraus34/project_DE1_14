@@ -290,3 +290,198 @@ end architecture Behavioral;
 0x00 (ticho), 0x20 (střední hlasitost), 0x3E (hlasitý zvuk) a 0x11 po změně okna na 32 vzorků.*
 
 ---
+
+### peak_hold
+
+Drží maximální hodnotu amplitudy. BTNU přepíná Peak Hold on/off, BTND resetuje maximum na aktuální hodnotu. Při aktivním Peak Hold je `peak_active_o = '1'`.
+
+#### Porty
+
+| Port | Směr | Typ | Popis |
+|---|---|---|---|
+| `clk` | in | std_logic | Hlavní hodiny |
+| `rst` | in | std_logic | Synchronní reset |
+| `btn_mode_i` | in | std_logic | BTNU – přepnutí Peak Hold |
+| `btn_reset_i` | in | std_logic | BTND – reset peak hodnoty |
+| `level_i` | in | std_logic_vector(7 downto 0) | Aktuální amplituda |
+| `valid_i` | in | std_logic | Nová platná hodnota |
+| `level_o` | out | std_logic_vector(7 downto 0) | Výstup (peak nebo přímá hodnota) |
+| `peak_active_o` | out | std_logic | '1' = Peak Hold je zapnutý |
+
+#### VHDL kód
+
+```vhdl
+library ieee;
+  use ieee.std_logic_1164.all;
+  use ieee.numeric_std.all;
+
+entity peak_hold is
+    port (
+        clk           : in  std_logic;
+        rst           : in  std_logic;
+        btn_mode_i    : in  std_logic;
+        btn_reset_i   : in  std_logic;
+        level_i       : in  std_logic_vector(7 downto 0);
+        valid_i       : in  std_logic;
+        level_o       : out std_logic_vector(7 downto 0);
+        peak_active_o : out std_logic
+    );
+end entity peak_hold;
+
+architecture Behavioral of peak_hold is
+
+    signal sig_peak_en  : std_logic            := '0';
+    signal sig_peak_val : unsigned(7 downto 0) := (others => '0');
+
+begin
+
+    p_peak : process (clk) is
+    begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                sig_peak_en  <= '0';
+                sig_peak_val <= (others => '0');
+            else
+                if btn_mode_i = '1' then
+                    sig_peak_en  <= not sig_peak_en;
+                    sig_peak_val <= (others => '0');
+                end if;
+
+                if btn_reset_i = '1' then
+                    sig_peak_val <= unsigned(level_i);
+                end if;
+
+                if valid_i = '1' and sig_peak_en = '1' then
+                    if unsigned(level_i) > sig_peak_val then
+                        sig_peak_val <= unsigned(level_i);
+                    end if;
+                end if;
+            end if;
+        end if;
+    end process p_peak;
+
+    level_o       <= std_logic_vector(sig_peak_val) when sig_peak_en = '1'
+                     else level_i;
+    peak_active_o <= sig_peak_en;
+
+end architecture Behavioral;
+```
+
+---
+
+### led_bar
+
+Převede amplitudu (0–255) na počet rozsvícených LED (0–16). Při aktivním Peak Hold bliká nejvyšší rozsvícená LED (~6 Hz) jako vizuální indikace.
+
+#### Porty
+
+| Port | Směr | Typ | Popis |
+|---|---|---|---|
+| `clk` | in | std_logic | Hlavní hodiny |
+| `rst` | in | std_logic | Synchronní reset |
+| `level_i` | in | std_logic_vector(7 downto 0) | Amplituda 0–255 |
+| `valid_i` | in | std_logic | Nová platná hodnota |
+| `peak_active_i` | in | std_logic | Peak Hold aktivní |
+| `led_o` | out | std_logic_vector(15 downto 0) | 16 LED výstupů |
+
+#### VHDL kód
+
+```vhdl
+library ieee;
+  use ieee.std_logic_1164.all;
+  use ieee.numeric_std.all;
+
+entity led_bar is
+    port (
+        clk           : in  std_logic;
+        rst           : in  std_logic;
+        level_i       : in  std_logic_vector(7 downto 0);
+        valid_i       : in  std_logic;
+        peak_active_i : in  std_logic;
+        led_o         : out std_logic_vector(15 downto 0)
+    );
+end entity led_bar;
+
+architecture Behavioral of led_bar is
+
+    signal sig_level     : integer range 0 to 16 := 0;
+    signal sig_blink_cnt : unsigned(23 downto 0) := (others => '0');
+    signal sig_blink     : std_logic := '0';
+
+begin
+
+    sig_level <= to_integer(unsigned(level_i(7 downto 4)));
+
+    p_blink : process (clk) is
+    begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                sig_blink_cnt <= (others => '0');
+                sig_blink     <= '0';
+            else
+                sig_blink_cnt <= sig_blink_cnt + 1;
+                if sig_blink_cnt = 0 then
+                    sig_blink <= not sig_blink;
+                end if;
+            end if;
+        end if;
+    end process p_blink;
+
+    p_led : process (clk) is
+    begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                led_o <= (others => '0');
+            elsif valid_i = '1' then
+                led_o <= (others => '0');
+                for i in 0 to 15 loop
+                    if i < sig_level then
+                        led_o(i) <= '1';
+                    elsif i = sig_level and peak_active_i = '1' then
+                        led_o(i) <= sig_blink;
+                    end if;
+                end loop;
+            end if;
+        end if;
+    end process p_led;
+
+end architecture Behavioral;
+```
+
+---
+
+## Lab 3: Integration
+
+*Bude doplněno – top_level.vhd, syntéza, testování na HW.*
+
+---
+
+## Lab 4: Tuning
+
+*Bude doplněno – ladění, optimalizace.*
+
+---
+
+## Lab 5: Defense
+
+*Bude doplněno – video, poster, resource report.*
+
+### Resource Report (po syntéze)
+
+| Resource | Used | Available | Utilization |
+|---|---|---|---|
+| LUT | – | 20800 | – |
+| FF | – | 41600 | – |
+| BRAM | – | 50 | – |
+| IO | – | 210 | – |
+
+---
+
+## Reference
+
+- [Nexys A7 Reference Manual](https://digilent.com/reference/programmable-logic/nexys-a7/reference-manual)
+- [PDM Microphone Datasheet – SPH0641LU4H-1](https://www.knowles.com/docs/default-source/default-document-library/sph0641lu4h-1-datasheet.pdf)
+- [tomas-fryza/vhdl-examples](https://github.com/tomas-fryza/vhdl-examples)
+- Vivado 2025.2
+- [draw.io](https://draw.io) – blokové schéma
+
