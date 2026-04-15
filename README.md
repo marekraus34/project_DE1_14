@@ -54,6 +54,7 @@ Cílem projektu je zobrazení intenzity zvukového signálu v reálném čase po
 *Viz soubor `img/block_diagram.png`*
 
 ```
+<<<<<<< HEAD
                      ┌──────────────────────────────────────────────────┐
                      │                    TOP LEVEL                     │
                      │                                                  │
@@ -103,6 +104,10 @@ Cílem projektu je zobrazení intenzity zvukového signálu v reálném čase po
 
 ---
 
+=======
+zde bude schema hanz
+```
+>>>>>>> 344c4952a6ade6416891c77ced04975b10327ee2
 ## Lab 2: Unit Design
 
 ### debounce
@@ -188,6 +193,7 @@ end architecture Behavioral;
 
 ---
 
+<<<<<<< HEAD
 ### pdm_driver
 
 Generuje clock pro mikrofon (100 MHz / 32 = 3.125 MHz) a čte PDM bity na každou náběžnou hranu mic_clk.
@@ -265,6 +271,11 @@ begin
 end architecture Behavioral;
 ```
 
+=======
+---
+zde bude pdm_driver i s vhdl kodem aji porty tam vlozi hanz
+---
+>>>>>>> 344c4952a6ade6416891c77ced04975b10327ee2
 ---
 
 ### sensitivity_ctrl
@@ -605,3 +616,7 @@ end architecture Behavioral;
 - [tomas-fryza/vhdl-examples](https://github.com/tomas-fryza/vhdl-examples)
 - Vivado 2025.2
 - [draw.io](https://draw.io) – blokové schéma
+<<<<<<< HEAD
+=======
+
+>>>>>>> 344c4952a6ade6416891c77ced04975b10327ee2
